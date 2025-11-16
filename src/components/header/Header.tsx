@@ -17,6 +17,8 @@ export default function Header() {
     const email = user?.email;
     console.log(email)
 
+    
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
