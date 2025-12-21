@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   if (!token && !publicPaths.some((p) => path.startsWith(p))) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/signin", request.url));
   }
 
   return NextResponse.next();
