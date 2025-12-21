@@ -11,10 +11,10 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // 🔓 public routes
+ 
   const publicPaths = ["/login", "/signin", "/api/auth"];
 
-  // ❌ যদি login না থাকে → /signin redirect
+  
   if (!token && !publicPaths.some((p) => path.startsWith(p))) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
