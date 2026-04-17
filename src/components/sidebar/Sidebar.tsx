@@ -4,27 +4,62 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
+  Briefcase,
+  ClipboardList,
+  Cpu,
+  FileText,
+  Hash,
+  Home,
   LayoutDashboard,
   LogOut,
-  PackageOpen,
-  TruckElectric,
+  MessageSquare,
+  User,
 } from "lucide-react";
-import Image from "next/image";
-// import { LogoutModal } from "../modal/Logout";
 import { useState } from "react";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Dashboard Overview", href: "/", icon: LayoutDashboard },
   {
-    name: "Requested delivary",
+    name: "Homehero Section",
     href: "/requested-delivary",
-    icon: PackageOpen,
+    icon: Home,
   },
   {
-    name: "My delivary",
+    name: "About Me Section",
     href: "/my-delivary",
-    icon: TruckElectric,
+    icon: User,
+  },
+   {
+    name: "My Skills Section",
+    href: "/my-delivary",
+    icon: Cpu,
+  },
+   {
+    name: "Resume Section",
+    href: "/my-delivary",
+    icon: FileText,
+  },
+   {
+    name: "Projects Section",
+    href: "/my-delivary",
+    icon: Briefcase,
+  },
+   {
+    name: "Experience Section",
+    href: "/my-delivary",
+    icon: ClipboardList,
+  },
+  {
+    name: "Knowledge & Blog Section",
+    href: "/my-delivary",
+    icon: Hash,
+  },
+  {
+    name: "Contact Section",
+    href: "/my-delivary",
+    icon: MessageSquare,
   }
+
 ];
 
 export function Sidebar() {
@@ -35,23 +70,8 @@ export function Sidebar() {
     <div className="flex h-screen sticky bottom-0 top-0 w-[350px] flex-col bg-[#212121] z-50">
       {/* Logo */}
       <div className="h-[80px] flex items-center justify-start ml-3">
-        <div className="text-2xl flex gap-1 font-bold text-blue-600 uppercase tracking-wider">
-          <div className="h-[50px] w-[50px]">
-            <Image
-              src="/images/dashboardLogo.gif"
-              alt=""
-              height={200}
-              width={200}
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <h1 className="text-green-500">
-              T<span className="text-red-400">O</span>MAT
-              <span className="text-red-400">O</span>
-            </h1>
-            <p className="text-white text-[10px]">Tomaot.LID</p>
-          </div>
+        <div className="text-5xl gap-1 font-bold text-blue-600 uppercase tracking-wider w-full flex items-center justify-center">
+           <h1 className="text-center">Tanvir</h1>
         </div>
       </div>
 
@@ -67,7 +87,7 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex w-[90%] mx-auto items-center justify-start gap-2 space-y-1 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                "flex w-[94%] mx-auto items-center justify-start gap-2 space-y-1 rounded-[4px] px-3 py-2 text-sm font-medium transition-all duration-200",
                 isActive
                   ? "bg-white text-black"
                   : "text-slate-300 hover:bg-slate-600/50 hover:text-white"
