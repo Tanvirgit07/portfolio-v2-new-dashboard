@@ -26,12 +26,12 @@ const navigation = [
   },
   {
     name: "About Me Section",
-    href: "/my-delivary",
+    href: "/about",
     icon: User,
   },
    {
     name: "My Skills Section",
-    href: "/my-delivary",
+    href: "/skill",
     icon: Cpu,
   },
    {
