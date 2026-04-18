@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import Link from "next/link";
@@ -36,22 +37,22 @@ const navigation = [
   },
    {
     name: "Resume Section",
-    href: "/my-delivary",
+    href: "/resume",
     icon: FileText,
   },
    {
     name: "Projects Section",
-    href: "/my-delivary",
+    href: "/projects",
     icon: Briefcase,
   },
    {
     name: "Experience Section",
-    href: "/my-delivary",
+    href: "/experience",
     icon: ClipboardList,
   },
   {
     name: "Knowledge & Blog Section",
-    href: "/my-delivary",
+    href: "/knowledge",
     icon: Hash,
   },
   {
