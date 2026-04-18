@@ -21,7 +21,7 @@ const navigation = [
   { name: "Dashboard Overview", href: "/", icon: LayoutDashboard },
   {
     name: "Homehero Section",
-    href: "/requested-delivary",
+    href: "/home-hero",
     icon: Home,
   },
   {
