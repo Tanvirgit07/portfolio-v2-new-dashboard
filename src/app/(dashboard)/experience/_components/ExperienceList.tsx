@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  LayoutDashboard, ChevronRight, Plus, 
-  Edit2, Calendar, 
+import {
+  LayoutDashboard,
+  ChevronRight,
+  Plus,
+  Edit2,
+  Calendar,
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +28,7 @@ const initialExperiences = [
     company: "Medium.com",
     duration: "Nov 2021 - Present",
     side: "right",
-  }
+  },
 ];
 
 export default function ExperienceList() {
@@ -36,12 +39,17 @@ export default function ExperienceList() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-4 py-2 rounded-full border border-zinc-800">
-          <Link href="/dashboard" className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors">
+          <Link
+            href="/dashboard"
+            className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors"
+          >
             <LayoutDashboard className="h-4 w-4 mr-2" />
             <span>Dashboard</span>
           </Link>
           <ChevronRight className="h-4 w-4 text-zinc-600" />
-          <span className="text-white font-bold uppercase text-[11px] tracking-wider">Experience Management</span>
+          <span className="text-white font-bold uppercase text-[11px] tracking-wider">
+            Experience Management
+          </span>
         </nav>
 
         <Link href="/dashboard/experience/add">
@@ -56,18 +64,31 @@ export default function ExperienceList() {
         <table className="w-full text-left border-collapse">
           <thead className="bg-zinc-900/50">
             <tr className="border-zinc-800">
-              <th className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Role & Company</th>
-              <th className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest hidden md:table-cell">Duration</th>
-              <th className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Side</th>
-              <th className="px-6 py-5 text-right text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Actions</th>
+              <th className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
+                Role & Company
+              </th>
+              <th className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest hidden md:table-cell">
+                Duration
+              </th>
+              <th className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
+                Side
+              </th>
+              <th className="px-6 py-5 text-right text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/50">
             {experiences.map((exp) => (
-              <tr key={exp.id} className="hover:bg-white/[0.02] transition-colors group">
+              <tr
+                key={exp.id}
+                className="hover:bg-white/[0.02] transition-colors group"
+              >
                 <td className="px-6 py-5">
                   <div className="flex flex-col">
-                    <span className="text-white font-bold text-sm group-hover:text-[#c7d300] transition-colors">{exp.role}</span>
+                    <span className="text-white font-bold text-sm group-hover:text-[#c7d300] transition-colors">
+                      {exp.role}
+                    </span>
                     <span className="text-zinc-500 text-[11px] flex items-center gap-1">
                       <MapPin size={10} /> {exp.company}
                     </span>
@@ -80,15 +101,18 @@ export default function ExperienceList() {
                   </div>
                 </td>
                 <td className="px-6 py-5">
-                  <Badge variant="outline" className="border-zinc-800 text-[9px] uppercase font-black text-zinc-500">
+                  <Badge
+                    variant="outline"
+                    className="border-zinc-800 text-[9px] uppercase font-black text-zinc-500"
+                  >
                     {exp.side}
                   </Badge>
                 </td>
                 <td className="px-6 py-5 text-right">
                   <div className="flex justify-end gap-2">
                     <Link href={`/experience/edit-experience/${exp.id}`}>
-                      <button className="p-2.5 bg-zinc-900/50 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
-                        <Edit2 size={16} />
+                      <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
+                        <Edit2 className="h-5 w-5" />
                       </button>
                     </Link>
                     <DeleteModule />

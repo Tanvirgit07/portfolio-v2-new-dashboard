@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState } from "react";
@@ -16,6 +17,7 @@ import {
   Plus,
   Zap,
   Edit as EditIcon,
+  Edit2,
 } from "lucide-react";
 import Link from "next/link";
 import { DeleteModule } from "@/components/DeleteModule";
@@ -171,8 +173,8 @@ export default function SkillList() {
                     <div className="flex items-center justify-end space-x-2">
                       <ViewSkill />
                       <Link href={`/skill/edit-skill/${skill.id}`}>
-                        <button className="p-2.5 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
-                          <EditIcon className="h-4.5 w-4.5" />
+                        <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
+                          <Edit2 className="h-5 w-5" />
                         </button>
                       </Link>
                       <DeleteModule />

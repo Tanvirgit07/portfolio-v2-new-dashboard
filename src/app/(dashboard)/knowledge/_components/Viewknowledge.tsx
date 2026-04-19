@@ -8,12 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Eye,
-  Tag,
-  Code2,
-  Image as ImageIcon,
-} from "lucide-react";
+import { Eye, Tag, Code2, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 
 const dummyPost = {
@@ -32,9 +27,9 @@ export function ViewKnowledge() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="p-2.5 bg-zinc-900 text-zinc-500 hover:text-blue-400 rounded-xl border border-zinc-800 transition-all">
-                      <Eye size={16} />
-                    </button>
+        <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
+          <Eye className="h-5 w-5" />
+        </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[700px] bg-[#0f100a] text-white border-zinc-800 p-0 overflow-hidden shadow-2xl">
         <div className="h-1.5 w-full bg-[#c7d300] shadow-[0_0_15px_#c7d300]" />
