@@ -1,150 +1,76 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
-import {
-  LayoutDashboard,
-  ChevronRight,
-  Plus,
-  Edit2,
-  Search,
-} from "lucide-react";
+import { LayoutDashboard, ChevronRight, Plus, Edit2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { DeleteModule } from "@/components/DeleteModule";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ViewKnowledge } from "./Viewknowledge";
-
-const dummyKnowledge = [
-  {
-    id: 101,
-    category: "Logic",
-    title: "Neural Interface Design System",
-    date: "Oct 12, 2025",
-    thumbnail:
-      "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=400",
-  },
-  {
-    id: 102,
-    category: "Problem Solving",
-    title: "Fluid Motion Physics in WebGL",
-    date: "Nov 05, 2025",
-    thumbnail:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
 
 export default function KnowledgeList() {
+  const { data: knowledgeData, isLoading } = useQuery({
+    queryKey: ["knowledge-list"],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/knowledge/all-knowledge`);
+      const result = await res.json();
+      return result.data;
+    },
+  });
+
+  if (isLoading) return <div className="h-96 flex items-center justify-center"><Loader2 className="animate-spin text-[#c7d300]" /></div>;
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-4 py-2 rounded-full border border-zinc-800">
-          <Link
-            href="/dashboard"
-            className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors"
-          >
+          <Link href="/dashboard" className="flex items-center text-zinc-400 hover:text-[#c7d300]">
             <LayoutDashboard className="h-4 w-4 mr-2" />
             <span>Dashboard</span>
           </Link>
           <ChevronRight className="h-4 w-4 text-zinc-600" />
-          <span className="text-white font-bold uppercase text-[11px] tracking-wider">
-            Knowledge Hub
-          </span>
+          <span className="text-white font-bold uppercase text-[11px]">Knowledge Hub</span>
         </nav>
-
         <Link href="/knowledge/add-knowledge">
-          <button className="flex items-center gap-2 bg-[#c7d300] text-black px-6 py-3 rounded-xl font-bold text-base hover:shadow-[0_0_20px_rgba(199,211,0,0.2)] transition-all">
+          <button className="flex items-center gap-2 bg-[#c7d300] text-black px-6 py-3 rounded-xl font-bold">
             <Plus className="h-5 w-5" /> Create Insight
           </button>
         </Link>
       </div>
 
-      {/* Stats & Search */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 relative">
-          <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Search insights..."
-            className="w-full bg-[#1a1b14] border border-zinc-800 rounded-2xl py-3.5 pl-12 text-sm text-white focus:border-[#c7d300]/50 outline-none transition-all"
-          />
-        </div>
-        <div className="bg-[#1a1b14] border border-zinc-800 rounded-2xl px-6 py-3 flex items-center justify-between">
-          <span className="text-zinc-500 text-xs font-bold uppercase">
-            Total Posts
-          </span>
-          <span className="text-[#c7d300] font-black text-xl">24</span>
-        </div>
-      </div>
-
-      {/* Shadcn Table Container */}
       <div className="rounded-[2rem] border border-zinc-800 bg-[#1a1b14] overflow-hidden">
         <Table>
           <TableHeader className="bg-zinc-900/50">
             <TableRow className="border-zinc-800 hover:bg-transparent">
-              <TableHead className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-                Insight Title
-              </TableHead>
-              <TableHead className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-                Category
-              </TableHead>
-              <TableHead className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-                Date
-              </TableHead>
-              <TableHead className="px-6 py-5 text-right text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-                Actions
-              </TableHead>
+              <TableHead className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px]">Insight Title</TableHead>
+              <TableHead className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px]">Category</TableHead>
+              <TableHead className="px-6 py-5 text-zinc-400 font-bold uppercase text-[10px]">Date</TableHead>
+              <TableHead className="px-6 py-5 text-right text-zinc-400 font-bold uppercase text-[10px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dummyKnowledge.map((item) => (
-              <TableRow
-                key={item.id}
-                className="border-zinc-800/50 hover:bg-white/[0.02] transition-colors group"
-              >
+            {knowledgeData?.data?.map((item: any) => (
+              <TableRow key={item._id} className="border-zinc-800/50 hover:bg-white/[0.02] group">
                 <TableCell className="px-6 py-4">
                   <div className="flex items-center gap-4">
-                    <div className="relative h-12 w-20 rounded-lg overflow-hidden border border-zinc-800 shrink-0">
-                      <Image
-                        src={item.thumbnail}
-                        alt={item.title}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
+                    <div className="relative h-12 w-20 rounded-lg overflow-hidden border border-zinc-800">
+                      <Image src={item.images?.[0]?.url || "/placeholder.png"} alt="" fill className="object-cover" />
                     </div>
-                    <span className="text-white font-bold text-sm group-hover:text-[#c7d300] transition-colors line-clamp-1">
-                      {item.title}
-                    </span>
+                    <span className="text-white font-bold text-sm group-hover:text-[#c7d300]">{item.title}</span>
                   </div>
                 </TableCell>
-                <TableCell className="px-6 py-4">
-                  <Badge className="bg-[#c7d300]/10 text-[#c7d300] border-none text-[9px] uppercase font-black hover:bg-[#c7d300]/20">
-                    {item.category}
-                  </Badge>
-                </TableCell>
-                <TableCell className="px-6 py-4 text-zinc-500 text-xs font-medium whitespace-nowrap">
-                  {item.date}
-                </TableCell>
+                <TableCell><Badge className="bg-[#c7d300]/10 text-[#c7d300] border-none text-[9px] font-black">{item.category}</Badge></TableCell>
+                <TableCell className="text-zinc-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell className="px-6 py-3">
                   <div className="flex justify-end gap-2">
-                    <ViewKnowledge />
-                    <Link href={`/knowledge/edit-knowledge/${item?.id}`}>
-                      <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
-                        <Edit2 className="h-5 w-5" />
-                      </button>
+                    <ViewKnowledge knowledgeId={item._id} />
+                    <Link href={`/knowledge/edit-knowledge/${item._id}`}>
+                      <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] rounded-xl border border-zinc-800"><Edit2 className="h-5 w-5" /></button>
                     </Link>
-                    <DeleteModule />
+                    <DeleteModule id={item._id} endpoint="/knowledge/delete-knowledge" queryKey={["knowledge-list"]} />
                   </div>
                 </TableCell>
               </TableRow>

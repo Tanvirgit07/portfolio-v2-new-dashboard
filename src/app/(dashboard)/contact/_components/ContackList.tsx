@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   LayoutDashboard,
   ChevronRight,
@@ -9,37 +9,27 @@ import {
   MapPin,
   MessageSquare,
   Globe,
-  Trash2,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { ViewContact } from "./ViewContact";
 import { DeleteModule } from "@/components/DeleteModule";
-
-// ডামি ডাটা: ওয়েবসাইট থেকে আসা মেসেজ
-const initialMessages = [
-  {
-    id: "msg-01",
-    name: "Tanvir Ahmmed",
-    email: "tanvir@example.com",
-    service: "Web Design",
-    message: "I want to collaborate on a new Next.js project.",
-    date: "18 April 2026",
-    status: "new"
-  },
-  {
-    id: "msg-02",
-    name: "John Doe",
-    email: "john@portfolio.com",
-    service: "Others",
-    message: "Can we hop on a call tomorrow?",
-    date: "15 April 2026",
-    status: "read"
-  }
-];
+import { useQuery } from "@tanstack/react-query";
 
 export default function ContactList() {
-  const [messages, setMessages] = useState(initialMessages);
+  // API থেকে সব মেসেজ ফেচ করা হচ্ছে
+  const { data: contactData, isLoading } = useQuery({
+    queryKey: ["contact-messages"],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/contact/get-all-messages`);
+      const result = await res.json();
+      return result.data;
+    },
+  });
+
+  const messages = contactData?.contacts || [];
+  const totalMessages = contactData?.paginationInfo?.totalData || 0;
 
   return (
     <div className="space-y-10 pb-10">
@@ -68,7 +58,7 @@ export default function ContactList() {
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: "New Messages", value: "01", icon: MessageSquare, color: "#c7d300" },
+          { label: "Total Inquiries", value: totalMessages.toString().padStart(2, '0'), icon: MessageSquare, color: "#c7d300" },
           { label: "Public Email", value: "Active", icon: Mail, color: "#4ade80" },
           { label: "Location Status", value: "Visible", icon: MapPin, color: "#60a5fa" },
         ].map((stat, i) => (
@@ -90,44 +80,52 @@ export default function ContactList() {
         </h3>
         
         <div className="bg-[#1a1b14] border border-zinc-800 rounded-3xl overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-zinc-900/50 border-b border-zinc-800 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-              <tr>
-                <th className="px-6 py-4">Sender</th>
-                <th className="px-6 py-4">Service Required</th>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/50">
-              {messages.map((msg) => (
-                <tr key={msg.id} className="group hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-white font-bold text-sm">{msg.name}</span>
-                      <span className="text-zinc-500 text-[11px]">{msg.email}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="px-3 py-1 bg-zinc-900 border border-zinc-800 text-[#c7d300] text-[10px] font-bold rounded-lg uppercase">
-                      {msg.service}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2 text-zinc-500 text-xs">
-                      <Clock size={12} /> {msg.date}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex justify-end gap-3">
-                       <ViewContact />
-                      <DeleteModule />
-                    </div>
-                  </td>
+          {isLoading ? (
+            <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-[#c7d300]" /></div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-zinc-900/50 border-b border-zinc-800 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                <tr>
+                  <th className="px-6 py-4">Sender</th>
+                  <th className="px-6 py-4">Service Required</th>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/50">
+                {messages.map((msg: any) => (
+                  <tr key={msg._id} className="group hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col">
+                        <span className="text-white font-bold text-sm">{msg.firstName} {msg.lastName}</span>
+                        <span className="text-zinc-500 text-[11px]">{msg.email}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex gap-1 flex-wrap">
+                        {msg.services.map((s: string, idx: number) => (
+                          <span key={idx} className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 text-[#c7d300] text-[9px] font-bold rounded uppercase">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 text-zinc-500 text-xs">
+                        <Clock size={12} /> {new Date(msg.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <div className="flex justify-end gap-3">
+                         <ViewContact messageId={msg._id} />
+                         <DeleteModule id={msg._id} endpoint="/contact/delete-message" queryKey={["contact-messages"]} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
