@@ -57,7 +57,7 @@ const navigation = [
     icon: Crown,
   },
   {
-    name: "Knowledge & Blog Section",
+    name: "Knowledge & Blogs",
     href: "/knowledge",
     icon: Hash,
   },

@@ -14,28 +14,28 @@ const ctaItems = [
     title: "New Project",
     description: "Launch a new project entry",
     icon: <PlusCircle className="h-6 w-6" />,
-    link: "/dashboard/projects/new",
+    link: "/projects",
     bg: "hover:border-[#c7d300]/50"
   },
   {
     title: "Write Blog",
     description: "Share your latest technical logic",
     icon: <FileText className="h-6 w-6" />,
-    link: "/dashboard/blogs/new",
+    link: "/knowledge",
     bg: "hover:border-[#c7d300]/50"
   },
   {
-    title: "Profile Settings",
+    title: "Explore Skills",
     description: "Update your personal branding",
     icon: <Settings className="h-6 w-6" />,
-    link: "/dashboard/settings",
+    link: "/skill",
     bg: "hover:border-[#c7d300]/50"
   },
   {
-    title: "View Portfolio",
+    title: "See MY Expriences",
     description: "Check how the world sees you",
     icon: <UserCircle className="h-6 w-6" />,
-    link: "/portfolio",
+    link: "/experience",
     bg: "hover:border-[#c7d300]/50"
   }
 ]
