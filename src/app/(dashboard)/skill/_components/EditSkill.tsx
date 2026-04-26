@@ -67,7 +67,7 @@ export default function EditSkill() {
       queryClient.invalidateQueries({ queryKey: ["skills"] });
       queryClient.invalidateQueries({ queryKey: ["skill", id] });
       toast.success("Skill updated successfully");
-      router.push("/dashboard/skills");
+      router.push("/skill");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -100,7 +100,7 @@ export default function EditSkill() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-5 py-2.5 rounded-full border border-zinc-800">
           <Link
-            href="/dashboard"
+            href="/"
             className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors"
           >
             <LayoutDashboard className="h-4 w-4 mr-2" />

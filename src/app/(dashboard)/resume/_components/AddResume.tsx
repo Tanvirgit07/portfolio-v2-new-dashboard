@@ -37,7 +37,7 @@ export default function AddResume() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resumes"] });
       toast.success("Resume uploaded successfully!");
-      router.push("/dashboard/resume");
+      router.push("/resume");
     },
     onError: (err) => toast.error(err.message),
   });

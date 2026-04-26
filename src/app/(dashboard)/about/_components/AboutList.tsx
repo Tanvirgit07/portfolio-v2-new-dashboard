@@ -86,7 +86,7 @@ function AboutList() {
   const toggleAboutMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/about/toggleAboutUpdate/${id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/about/updateIsActiveAbout/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

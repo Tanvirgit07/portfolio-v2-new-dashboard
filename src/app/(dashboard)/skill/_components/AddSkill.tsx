@@ -26,7 +26,7 @@ export default function AddSkill() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["skills"] });
       toast.success("Skill added successfully");
-      router.push("/dashboard/skills");
+      router.push("/skill");
     },
     onError: (error: Error) => toast.error(error.message),
   });

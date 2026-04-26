@@ -72,7 +72,7 @@ function EditAbout() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["about"] });
       toast.success("About story updated!");
-      router.push("/dashboard/about");
+      router.push("/about");
     },
     onError: (err: any) => toast.error(err.message),
   });

@@ -69,7 +69,7 @@ export default function ResumeList() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-5 py-2.5 rounded-full border border-zinc-800">
-          <Link href="/dashboard" className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors">
+          <Link href="/" className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors">
             <LayoutDashboard className="h-4 w-4 mr-2" />
             <span className="font-medium">Dashboard</span>
           </Link>
@@ -77,7 +77,7 @@ export default function ResumeList() {
           <span className="text-white font-semibold tracking-wide uppercase text-[12px]">Resume Management</span>
         </nav>
 
-        <Link href="/dashboard/resume/add">
+        <Link href="/resume/add-resume">
           <button className="flex items-center gap-2 bg-[#c7d300] text-black px-6 py-3 rounded-xl font-bold text-base hover:shadow-[0_0_20px_rgba(199,211,0,0.2)] transition-all">
             <Plus className="h-5 w-5" /> Upload New Resume
           </button>
@@ -144,7 +144,7 @@ export default function ResumeList() {
           </div>
         ))}
 
-        <Link href="/dashboard/resume/add" className="group">
+        <Link href="/resume/add-resume" className="group">
           <div className="h-full min-h-[280px] border-2 border-dashed border-zinc-800 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-[#c7d300]/50 transition-all cursor-pointer">
             <div className="p-4 bg-zinc-900 rounded-full text-zinc-600 group-hover:text-[#c7d300] transition-colors">
               <Plus size={32} />

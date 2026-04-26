@@ -59,7 +59,7 @@ export default function SkillList() {
           </div>
         </nav>
 
-        <Link href="/dashboard/skills/add-skill">
+        <Link href="/skill/add-skill">
           <button className="flex items-center gap-2 bg-[#c7d300] text-black px-6 py-3 rounded-xl font-bold text-base hover:bg-[#b0ba00] transition-all">
             <Plus className="h-5 w-5" /> Add New Skill
           </button>
