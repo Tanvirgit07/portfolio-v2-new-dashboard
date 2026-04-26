@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,88 +15,125 @@ import {
   LayoutDashboard,
   ChevronRight,
   Plus,
-  Image as
   User,
   Edit as EditIcon,
-} from "lucide-react"; // ইমপোর্ট ফিক্স করা হয়েছে
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { DeleteModule } from "@/components/DeleteModule";
 import { ViewAbout } from "./ViewAbot";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-// টাইপ ইন্টারফেস (TypeScript Error ফিক্স করার জন্য)
-interface AboutItem {
-  id: string;
-  profileImage: string;
-  typewriterStrings: string[];
-  titles: {
-    line1: string;
-    line2: string;
-  };
-  description: string[];
-  stats: { label: string; value: string }[];
-  cta: { text: string; link: string };
-  isActive: boolean;
+// --- TypeScript Interfaces based on your API ---
+
+interface Stat {
+  label: string;
+  value: string;
+  _id: string;
 }
 
-const initialAboutData: AboutItem[] = [
-  {
-    id: "about-1",
-    profileImage: "/images/tanvir.jpg",
-    typewriterStrings: ["About Me", "Full Stack Developer", "Next.js Developer", "Problem Solver"],
-    titles: {
-      line1: "Hey, I'm Tanvir Ahmmed 👋",
-      line2: "Full Stack Developer"
-    },
-    description: [
-      "I am a passionate Full Stack Developer focused on building modern web applications.",
-      "My expertise includes Next.js, React, and TypeScript."
-    ],
-    stats: [
-      { label: "YEARS OF EXPERIENCE", value: "4+" },
-      { label: "PROJECTS COMPLETED", value: "30+" }
-    ],
-    cta: { text: "View Projects", link: "/projects" },
-    isActive: true,
-  },
-  {
-    id: "about-2",
-    profileImage: "/images/dummy.jpg",
-    typewriterStrings: ["Designer", "UX Expert"],
-    titles: {
-      line1: "Hello, I am John Doe",
-      line2: "Product Designer"
-    },
-    description: ["Specialized in mobile app designs."],
-    stats: [{ label: "AWARDS", value: "10" }],
-    cta: { text: "Portfolio", link: "/portfolio" },
-    isActive: false,
-  }
-];
+interface AboutItem {
+  _id: string;
+  titleLine1: string;
+  titleLine2: string;
+  profileImage: string;
+  typewriterStrings: string[];
+  descriptions: string[];
+  stats: Stat[];
+  ctaText: string;
+  ctaLink: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+interface AboutListResponse {
+  status: boolean;
+  message: string;
+  data: {
+    abouts: AboutItem[];
+    paginationInfo: {
+      currentPage: number;
+      totalPages: number;
+      totalData: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
 
 function AboutList() {
-  const [abouts, setAbouts] = useState<AboutItem[]>(initialAboutData);
+  const queryClient = useQueryClient();
 
-  const toggleStatus = (id: string) => {
-    setAbouts((prevAbouts) =>
-      prevAbouts.map((item) =>
-        item.id === id ? { ...item, isActive: !item.isActive } : item
-      )
-    );
+  // 1. Fetch All About Data
+  const { data: aboutResponse, isLoading } = useQuery<AboutListResponse>({
+    queryKey: ["about"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/about/getallAboutContent`,
+      );
+      if (!res.ok) throw new Error("Failed to fetch about list");
+      return res.json();
+    },
+  });
+
+  const abouts = aboutResponse?.data?.abouts || [];
+
+  // 2. Toggle Status Mutation
+  const toggleAboutMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/about/toggleAboutUpdate/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive }),
+        },
+      );
+      if (!res.ok) throw new Error("Update failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["about"] });
+      toast.success("Status updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update status");
+    },
+  });
+
+  const handleToggle = (id: string, currentStatus: boolean) => {
+    toggleAboutMutation.mutate({ id, isActive: !currentStatus });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#c7d300]" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 p-4 md:p-0">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-5 py-2.5 rounded-full border border-zinc-800">
-          <Link href="/dashboard" className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors">
+          <Link
+            href="/dashboard"
+            className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors"
+          >
             <LayoutDashboard className="h-4 w-4 mr-2" />
             <span className="font-medium">Dashboard</span>
           </Link>
           <ChevronRight className="h-4 w-4 text-zinc-600" />
           <div className="flex items-center">
-            <span className="text-white font-semibold tracking-wide">About Section</span>
+            <span className="text-white font-semibold tracking-wide">
+              About Section
+            </span>
             <span className="ml-2 h-1.5 w-1.5 rounded-full bg-[#c7d300] animate-pulse"></span>
           </div>
         </nav>
@@ -120,85 +157,113 @@ function AboutList() {
           <Table>
             <TableHeader className="bg-zinc-900/60">
               <TableRow className="border-zinc-800 hover:bg-transparent">
-                <TableHead className="text-zinc-400 py-6 pl-8 font-bold uppercase text-xs tracking-widest">Profile</TableHead>
-                <TableHead className="text-zinc-400 py-6 font-bold uppercase text-xs tracking-widest">Introduction</TableHead>
-                <TableHead className="text-zinc-400 py-6 font-bold uppercase text-xs tracking-widest">Status</TableHead>
-                <TableHead className="text-zinc-400 py-6 pr-8 text-right font-bold uppercase text-xs tracking-widest">Actions</TableHead>
+                <TableHead className="text-zinc-400 py-6 pl-8 font-bold uppercase text-xs tracking-widest">
+                  Profile
+                </TableHead>
+                <TableHead className="text-zinc-400 py-6 font-bold uppercase text-xs tracking-widest">
+                  Introduction
+                </TableHead>
+                <TableHead className="text-zinc-400 py-6 font-bold uppercase text-xs tracking-widest">
+                  Status
+                </TableHead>
+                <TableHead className="text-zinc-400 py-6 pr-8 text-right font-bold uppercase text-xs tracking-widest">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {abouts.map((item) => (
-                <TableRow
-                  key={item.id}
-                  className="border-zinc-800/40 hover:bg-[#c7d300]/5 transition-all duration-500 group"
-                >
-                  {/* Profile Image Preview */}
-                  <TableCell className="py-8 pl-8">
-                    <div className="relative h-16 w-16 rounded-full overflow-hidden border-2 border-zinc-800 bg-zinc-900 group-hover:border-[#c7d300]/40 transition-all shadow-lg">
-                       <Image 
-                         src={item.profileImage} 
-                         alt="Profile" 
-                         fill 
-                         className="object-cover"
-                         sizes="64px"
-                       />
-                    </div>
-                  </TableCell>
+              {abouts.length > 0 ? (
+                abouts.map((item: AboutItem) => (
+                  <TableRow
+                    key={item._id}
+                    className="border-zinc-800/40 hover:bg-[#c7d300]/5 transition-all duration-500 group"
+                  >
+                    {/* Profile Image Preview */}
+                    <TableCell className="py-8 pl-8">
+                      <div className="relative h-16 w-16 rounded-full overflow-hidden border-2 border-zinc-800 bg-zinc-900 group-hover:border-[#c7d300]/40 transition-all shadow-lg">
+                        <Image
+                          src={item.profileImage || "/placeholder-user.png"}
+                          alt="Profile"
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                        />
+                      </div>
+                    </TableCell>
 
-                  {/* About Content */}
-                  <TableCell className="py-8">
-                    <div className="font-bold text-zinc-100 text-lg group-hover:text-[#c7d300] transition-colors leading-tight">
-                      {item.titles.line1}
-                    </div>
-                    <div className="text-sm text-zinc-500 mt-1 font-medium">
-                      {item.titles.line2}
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {item.typewriterStrings.map((text, i) => (
+                    {/* About Content */}
+                    <TableCell className="py-8 min-w-[250px]">
+                      <div className="font-bold text-zinc-100 text-lg group-hover:text-[#c7d300] transition-colors leading-tight">
+                        {item.titleLine1}
+                      </div>
+                      <div className="text-sm text-zinc-500 mt-1 font-medium">
+                        {item.titleLine2}
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {item.typewriterStrings.map((text, i) => (
+                          <span
+                            key={i}
+                            className="bg-zinc-900/80 text-zinc-400 text-[10px] px-2.5 py-1 rounded-full border border-zinc-800 font-medium uppercase tracking-tighter"
+                          >
+                            {text}
+                          </span>
+                        ))}
+                      </div>
+                    </TableCell>
+
+                    {/* Status & Switch */}
+                    <TableCell className="py-8">
+                      <div className="flex items-center gap-4">
+                        <Switch
+                          checked={item.isActive}
+                          onCheckedChange={() =>
+                            handleToggle(item._id, item.isActive)
+                          }
+                          disabled={toggleAboutMutation.isPending}
+                          className="data-[state=checked]:bg-[#c7d300]"
+                        />
                         <span
-                          key={i}
-                          className="bg-zinc-900/80 text-zinc-400 text-[10px] px-2.5 py-1 rounded-full border border-zinc-800 font-medium uppercase tracking-tighter"
+                          className={`text-[10px] font-black uppercase tracking-widest ${
+                            item.isActive ? "text-[#c7d300]" : "text-zinc-600"
+                          }`}
                         >
-                          {text}
+                          {item.isActive ? "Active" : "Hidden"}
                         </span>
-                      ))}
-                    </div>
-                  </TableCell>
+                      </div>
+                    </TableCell>
 
-                  {/* Status & Switch */}
-                  <TableCell className="py-8">
-                    <div className="flex items-center gap-4">
-                      <Switch
-                        checked={item.isActive}
-                        onCheckedChange={() => toggleStatus(item.id)}
-                        className="data-[state=checked]:bg-[#c7d300]"
-                      />
-                      <span
-                        className={`text-[10px] font-black uppercase tracking-widest ${
-                          item.isActive ? "text-[#c7d300]" : "text-zinc-600"
-                        }`}
-                      >
-                        {item.isActive ? "Active" : "Hidden"}
-                      </span>
-                    </div>
-                  </TableCell>
+                    {/* Action Buttons */}
+                    <TableCell className="py-8 pr-8 text-right">
+                      <div className="flex items-center justify-end space-x-2">
+                        <ViewAbout id={item._id} />
 
-                  {/* Action Buttons */}
-                  <TableCell className="py-8 pr-8 text-right">
-                    <div className="flex items-center justify-end space-x-2">
-                      <ViewAbout /> 
-                      
-                      <Link href={`/about/edit-about/${item.id}`}>
-                        <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
-                          <EditIcon className="h-5 w-5" />
-                        </button>
-                      </Link>
-                      
-                      <DeleteModule />
-                    </div>
+                        <Link href={`/about/edit-about/${item._id}`}>
+                          <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-[#c7d300] hover:bg-[#c7d300]/10 rounded-xl border border-zinc-800 transition-all">
+                            <EditIcon className="h-5 w-5" />
+                          </button>
+                        </Link>
+
+                        <DeleteModule
+                          id={item._id}
+                          endpoint="/about/deleteAbout"
+                          queryKey={["about"]}
+                          itemName="About Story"
+                          successMessage="About content removed!"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="py-10 text-center text-zinc-500 font-medium"
+                  >
+                    No about stories found.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>

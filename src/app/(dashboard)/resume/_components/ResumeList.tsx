@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   LayoutDashboard,
   ChevronRight,
@@ -8,49 +8,65 @@ import {
   FileText,
   ExternalLink,
   Calendar,
-  MoreVertical,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DeleteModule } from "@/components/DeleteModule";
+import { toast } from "sonner";
 
-// ডামি ডাটা অবজেক্ট যা আপনার সেকশনকে কন্ট্রোল করবে
-const initialResumes = [
-  {
-    id: "res-01",
-    title: "Full Stack Developer v2.4",
-    resumeLink: "https://yourportfolio.com/resume-v2-4.pdf",
-    version: "2.4.0_stable",
-    uploadedDate: "12 April 2026",
-    isActive: true, // এটি ওয়েবসাইটে লাইভ থাকবে
-  },
-  {
-    id: "res-02",
-    title: "Frontend Specialist (React)",
-    resumeLink: "https://yourportfolio.com/frontend-resume.pdf",
-    version: "1.8.2_old",
-    uploadedDate: "05 March 2026",
-    isActive: false,
-  },
-];
+interface Resume {
+  _id: string;
+  title: string;
+  version: string;
+  resumeUrl: string;
+  isActive: boolean;
+  createdAt: string;
+}
 
 export default function ResumeList() {
-  const [resumes, setResumes] = useState(initialResumes);
+  const queryClient = useQueryClient();
 
-  // একটি রেজুমে একটিভেট করার ফাংশন
-  const handleToggleActive = (id: string) => {
-    setResumes(prev => 
-      prev.map(res => ({
-        ...res,
-        isActive: res.id === id // শুধুমাত্র সিলেক্টেড আইডিটি ট্রু হবে, বাকি সব ফলস
-      }))
+  // ১. সব রেজুমে ফেচ করা
+  const { data, isLoading } = useQuery({
+    queryKey: ["resumes"],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/resume/getallResume`);
+      const result = await res.json();
+      return result.data.resumes as Resume[];
+    },
+  });
+
+  // ২. স্ট্যাটাস আপডেট মিউটেশন (Toggle Active)
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/resume/updateToggle/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resumes"] });
+      toast.success("Resume status updated!");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="h-96 flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-[#c7d300]" />
+      </div>
     );
-  };
+  }
 
   return (
     <div className="space-y-8">
-      {/* Header & Breadcrumb */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-5 py-2.5 rounded-full border border-zinc-800">
           <Link href="/dashboard" className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors">
@@ -58,54 +74,39 @@ export default function ResumeList() {
             <span className="font-medium">Dashboard</span>
           </Link>
           <ChevronRight className="h-4 w-4 text-zinc-600" />
-          <div className="flex items-center">
-            <span className="text-white font-semibold tracking-wide uppercase text-[12px]">Resume Management</span>
-            <span className="ml-2 h-1.5 w-1.5 rounded-full bg-[#c7d300]"></span>
-          </div>
+          <span className="text-white font-semibold tracking-wide uppercase text-[12px]">Resume Management</span>
         </nav>
 
-        <Link href="/resume/add-resume">
+        <Link href="/dashboard/resume/add">
           <button className="flex items-center gap-2 bg-[#c7d300] text-black px-6 py-3 rounded-xl font-bold text-base hover:shadow-[0_0_20px_rgba(199,211,0,0.2)] transition-all">
-            <Plus className="h-5 w-5" />
-            Upload New Resume
+            <Plus className="h-5 w-5" /> Upload New Resume
           </button>
         </Link>
       </div>
 
-      {/* Info Card */}
       <div className="bg-[#c7d300]/5 border border-[#c7d300]/20 rounded-2xl p-4 flex items-start gap-4">
         <AlertCircle className="text-[#c7d300] h-5 w-5 mt-0.5" />
         <p className="text-xs text-zinc-400 leading-relaxed">
-          You can store multiple resume versions here. Only the one marked as <span className="text-[#c7d300] font-bold">Active</span> will be visible and downloadable on your public website.
+          You can store multiple resume versions. Only the one marked as <span className="text-[#c7d300] font-bold">Active</span> will be live.
         </p>
       </div>
 
-      {/* Resume Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {resumes.map((resume) => (
+        {data?.map((resume) => (
           <div 
-            key={resume.id}
+            key={resume._id}
             className={`relative group bg-[#1a1b14] border-2 rounded-2xl p-6 transition-all duration-300 ${
               resume.isActive ? "border-[#c7d300] shadow-[0_0_30px_rgba(199,211,0,0.05)]" : "border-zinc-800 hover:border-zinc-700"
             }`}
           >
-            {/* Status Badge */}
             <div className="flex justify-between items-start mb-6">
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                 resume.isActive ? "bg-[#c7d300] text-black" : "bg-zinc-800 text-zinc-500"
               }`}>
-                {resume.isActive ? (
-                  <><CheckCircle2 size={12} /> Active Live</>
-                ) : (
-                  "Inactive"
-                )}
+                {resume.isActive ? <><CheckCircle2 size={12} /> Active Live</> : "Inactive"}
               </div>
-              <button className="text-zinc-600 hover:text-white transition-colors">
-                <MoreVertical size={18} />
-              </button>
             </div>
 
-            {/* Resume Details */}
             <div className="space-y-4">
               <div className="h-12 w-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[#c7d300]">
                 <FileText size={24} />
@@ -118,43 +119,33 @@ export default function ResumeList() {
               <div className="flex flex-col gap-2 pt-2">
                 <div className="flex items-center gap-2 text-zinc-500 text-[11px]">
                   <Calendar size={12} />
-                  Uploaded on {resume.uploadedDate}
+                  Uploaded on {new Date(resume.createdAt).toLocaleDateString()}
                 </div>
-                <a 
-                  href={resume.resumeLink} 
-                  target="_blank"
-                  className="flex items-center gap-2 text-[#c7d300] text-[11px] font-bold hover:underline"
-                >
+                <a href={resume.resumeUrl} target="_blank" className="flex items-center gap-2 text-[#c7d300] text-[11px] font-bold hover:underline">
                   <ExternalLink size={12} /> View File
                 </a>
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="mt-8 pt-6 border-t border-zinc-800/50 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {!resume.isActive && (
-                  <button 
-                    onClick={() => handleToggleActive(resume.id)}
-                    className="text-xs font-black uppercase tracking-tighter text-zinc-400 hover:text-[#c7d300] transition-colors"
-                  >
-                    Set as Active
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                {/* <Link href={`/dashboard/resume/edit/${resume.id}`}>
-                  <button className="text-zinc-500 hover:text-white transition-colors text-xs font-bold uppercase">Edit</button>
-                </Link> */}
-                <DeleteModule />
+              {!resume.isActive && (
+                <button 
+                  disabled={statusMutation.isPending}
+                  onClick={() => statusMutation.mutate({ id: resume._id, isActive: true })}
+                  className="text-xs font-black uppercase tracking-tighter text-zinc-400 hover:text-[#c7d300] transition-colors disabled:opacity-50"
+                >
+                  {statusMutation.isPending ? "Setting..." : "Set as Active"}
+                </button>
+              )}
+              <div className="ml-auto">
+                <DeleteModule id={resume._id} endpoint="/resume/deleteResume" queryKey={["resumes"]} itemName={resume.title} />
               </div>
             </div>
           </div>
         ))}
 
-        {/* Add New Card Placeholder */}
         <Link href="/dashboard/resume/add" className="group">
-          <div className="h-full min-h-[280px] border-2 border-dashed border-zinc-800 rounded-2xl flex flex-col items-center justify-center gap-4 group-hover:border-[#c7d300]/50 transition-all cursor-pointer">
+          <div className="h-full min-h-[280px] border-2 border-dashed border-zinc-800 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-[#c7d300]/50 transition-all cursor-pointer">
             <div className="p-4 bg-zinc-900 rounded-full text-zinc-600 group-hover:text-[#c7d300] transition-colors">
               <Plus size={32} />
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   ChevronRight,
@@ -10,54 +10,160 @@ import {
   Palette,
   Target,
   Info,
-  Code,
+  ImageIcon,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import Image from "next/image";
 
 export default function EditSkill() {
+  const { id } = useParams(); // URL থেকে ID নেওয়ার জন্য
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   // স্টেট ম্যানেজমেন্ট
   const [skillColor, setSkillColor] = useState("#c7d300");
   const [proficiency, setProficiency] = useState(80);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // ১. নির্দিষ্ট স্কিলের ডাটা ফেচ করা (Default Value এর জন্য)
+  const { data: skillData, isLoading } = useQuery({
+    queryKey: ["skill", id],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/skill/getsingleSkill/${id}`,
+      );
+      const result = await res.json();
+      return result.data;
+    },
+    enabled: !!id,
+  });
+
+  // ডাটা আসার পর স্টেট আপডেট করা
+  useEffect(() => {
+    if (skillData) {
+      setSkillColor(skillData.color);
+      setProficiency(skillData.proficiency);
+    }
+  }, [skillData]);
+
+  // ২. আপডেট মিউটেশন (Edit Logic)
+  const mutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/skill/updateSkill/${id}`,
+        {
+          method: "PUT", // বা PUT আপনার API অনুযায়ী
+          body: formData,
+        },
+      );
+      if (!res.ok) throw new Error("Failed to update skill");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["skills"] });
+      queryClient.invalidateQueries({ queryKey: ["skill", id] });
+      toast.success("Skill updated successfully");
+      router.push("/dashboard/skills");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    formData.set("color", skillColor);
+    formData.set("proficiency", proficiency.toString());
+
+    // যদি নতুন ইমেজ সিলেক্ট করা হয় তবেই অ্যাড হবে, না হলে আগেরটাই থাকবে
+    if (imageFile) {
+      formData.append("skillImage", imageFile);
+    }
+
+    mutation.mutate(formData);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-96 flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-[#c7d300]" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 pb-10">
+    <form onSubmit={handleSubmit} className="space-y-8 pb-10">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-5 py-2.5 rounded-full border border-zinc-800">
-          <Link href="/dashboard" className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors">
+          <Link
+            href="/dashboard"
+            className="flex items-center text-zinc-400 hover:text-[#c7d300] transition-colors"
+          >
             <LayoutDashboard className="h-4 w-4 mr-2" />
             <span className="font-medium">Dashboard</span>
           </Link>
           <ChevronRight className="h-4 w-4 text-zinc-600" />
-          <Link href="/dashboard/skills" className="text-zinc-400 hover:text-[#c7d300]">Skills</Link>
+          <Link
+            href="/dashboard/skills"
+            className="text-zinc-400 hover:text-[#c7d300]"
+          >
+            Skills
+          </Link>
           <ChevronRight className="h-4 w-4 text-zinc-600" />
           <div className="flex items-center">
-            <span className="text-white font-semibold tracking-wide text-[12px] uppercase">Add New Skill</span>
+            <span className="text-white font-semibold tracking-wide text-[12px] uppercase">
+              Edit Skill
+            </span>
             <span className="ml-2 h-1.5 w-1.5 rounded-full bg-[#c7d300]"></span>
           </div>
         </nav>
 
-        <button className="flex items-center gap-2 bg-[#c7d300] text-black px-8 py-3 rounded-xl font-bold text-base hover:shadow-[0_0_20px_rgba(199,211,0,0.3)] transition-all">
-          <Save className="h-5 w-5" />
-          Save Skill
+        <button
+          disabled={mutation.isPending}
+          type="submit"
+          className="flex items-center gap-2 bg-[#c7d300] text-black px-8 py-3 rounded-xl font-bold text-base hover:shadow-[0_0_20px_rgba(199,211,0,0.3)] transition-all disabled:opacity-50"
+        >
+          {mutation.isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Save className="h-5 w-5" />
+          )}
+          Update Skill
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Icon & Preview */}
+        {/* Left Column: Image & Color */}
         <div className="space-y-6">
           <section className="bg-[#212121] border border-zinc-800 rounded-2xl p-6">
             <h3 className="text-[#c7d300] text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
-              <Code className="h-4 w-4" /> SVG Icon Code
+              <ImageIcon className="h-4 w-4" /> Skill Image
             </h3>
             <div className="space-y-4">
-              <textarea
-                rows={8}
-                placeholder='<svg>...</svg>'
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-xs font-mono text-zinc-400 focus:border-[#c7d300] outline-none resize-none"
+              {/* ইমেজ প্রিভিউ (আগের ইমেজ) */}
+              {!imageFile && skillData?.image && (
+                <div className="w-16 h-16 mb-4 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                  <Image
+                    width={500}
+                    height={500}
+                    src={skillData.image}
+                    alt="preview"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                className="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#c7d300] file:text-black"
               />
               <p className="text-[10px] text-zinc-500 italic">
-                * Paste the SVG code here. It will be rendered as the skill icon.
+                * Leave empty to keep the current image.
               </p>
             </div>
           </section>
@@ -77,7 +183,7 @@ export default function EditSkill() {
               <input
                 type="text"
                 value={skillColor}
-                onChange={(e) => setSkillColor(e.target.value)}
+                readOnly
                 className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-sm font-mono text-white focus:border-[#c7d300] outline-none"
               />
             </div>
@@ -98,6 +204,9 @@ export default function EditSkill() {
                 </label>
                 <input
                   type="text"
+                  name="name"
+                  defaultValue={skillData?.name}
+                  required
                   placeholder="e.g. Next.js"
                   className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3.5 text-sm text-white focus:border-[#c7d300] outline-none transition-all"
                 />
@@ -105,7 +214,8 @@ export default function EditSkill() {
 
               <div className="space-y-2">
                 <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center gap-2">
-                  <Target className="h-3.5 w-3.5" /> Proficiency ({proficiency}%)
+                  <Target className="h-3.5 w-3.5" /> Proficiency ({proficiency}
+                  %)
                 </label>
                 <div className="flex items-center gap-4 py-2">
                   <input
@@ -122,33 +232,20 @@ export default function EditSkill() {
 
             <div className="space-y-2">
               <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center gap-2">
-                <Info className="h-3.5 w-3.5" /> Short Description / Tooltip
+                <Info className="h-3.5 w-3.5" /> Short Description
               </label>
-              <input
-                type="text"
+              <textarea
+                name="description"
+                defaultValue={skillData?.description}
+                required
+                rows={4}
                 placeholder="e.g. Next.js — The React Framework for the Web."
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3.5 text-sm text-white focus:border-[#c7d300] outline-none transition-all"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3.5 text-sm text-white focus:border-[#c7d300] outline-none transition-all resize-none"
               />
             </div>
           </section>
-
-          {/* Tips Section */}
-          <div className="bg-[#c7d300]/5 border border-[#c7d300]/20 rounded-2xl p-6">
-            <div className="flex gap-4">
-               <div className="h-10 w-10 rounded-full bg-[#c7d300]/10 flex items-center justify-center flex-shrink-0 text-[#c7d300]">
-                  <Info className="h-5 w-5" />
-               </div>
-               <div>
-                  <h4 className="text-sm font-bold text-white mb-1">Expert Tip</h4>
-                  <p className="text-xs text-zinc-500 leading-relaxed italic">
-                    Use high-quality SVG icons and specific theme colors to make your portfolio look professional. 
-                    The tooltip text should be concise (max 80-100 characters).
-                  </p>
-               </div>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }
