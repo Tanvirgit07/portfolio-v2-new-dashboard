@@ -25,14 +25,14 @@ export default function ProjectsList() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <nav className="flex items-center space-x-2 text-sm bg-[#212121]/30 w-fit px-4 py-2 rounded-full border border-zinc-800">
-          <Link href="/dashboard" className="flex items-center text-zinc-400 hover:text-[#c7d300]">
+          <Link href="/" className="flex items-center text-zinc-400 hover:text-[#c7d300]">
             <LayoutDashboard className="h-4 w-4 mr-2" />
             <span>Dashboard</span>
           </Link>
           <ChevronRight className="h-4 w-4 text-zinc-600" />
           <span className="text-white font-bold uppercase text-[11px]">Project Management</span>
         </nav>
-        <Link href="/dashboard/projects/add-project">
+        <Link href="/projects/add-project">
           <button className="flex items-center gap-2 bg-[#c7d300] text-black px-6 py-3 rounded-xl font-bold">
             <Plus className="h-5 w-5" /> Add New Project
           </button>
@@ -85,7 +85,7 @@ export default function ProjectsList() {
                 <TableCell className="py-4 pr-8 text-right">
                   <div className="flex items-center justify-end space-x-2">
                     <a href={project.links[0]?.url} target="_blank" className="p-2.5 bg-zinc-900/50 text-zinc-500 hover:text-[#c7d300] rounded-xl border border-zinc-800 transition-all"><ExternalLink size={16} /></a>
-                    <Link href={`/dashboard/projects/edit-project/${project._id}`}><button className="p-2.5 bg-zinc-900/50 text-zinc-500 hover:text-[#c7d300] rounded-xl border border-zinc-800 transition-all"><Edit2 size={16} /></button></Link>
+                    <Link href={`/projects/edit-project/${project._id}`}><button className="p-2.5 bg-zinc-900/50 text-zinc-500 hover:text-[#c7d300] rounded-xl border border-zinc-800 transition-all"><Edit2 size={16} /></button></Link>
                     <DeleteModule id={project._id} endpoint="/project/deleteProject" queryKey={["projects"]} itemName={project.title} />
                   </div>
                 </TableCell>
