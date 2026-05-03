@@ -41,7 +41,7 @@ export default function EditExperience() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experiences"] });
       toast.success("Journey Updated!");
-      router.push("/dashboard/experience");
+      router.push("/experience");
     },
   });
 

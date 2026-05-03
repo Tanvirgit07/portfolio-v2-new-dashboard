@@ -24,9 +24,7 @@ import Image from "next/image";
 
 // Dynamic import for ReactQuill
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
-// @ts-expect-error - library missing css type declarations
 import "react-quill-new/dist/quill.snow.css";
-
 export default function EditProject() {
   const { id } = useParams();
   const router = useRouter();

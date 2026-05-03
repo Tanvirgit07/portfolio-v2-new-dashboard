@@ -26,7 +26,7 @@ export default function AddExperience() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experiences"] });
       toast.success("Experience Added Successfully!");
-      router.push("/dashboard/experience");
+      router.push("/experience");
     },
   });
 

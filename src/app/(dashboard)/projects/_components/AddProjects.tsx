@@ -22,7 +22,6 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
-// @ts-expect-error - library missing css type declarations
 import "react-quill-new/dist/quill.snow.css";
 import Image from "next/image";
 
